@@ -1,3 +1,13 @@
+.announcement {
+  border-radius: 4px;
+  background-color: white;
+  color: black;
+  padding: 8px;
+  a {
+    color: darkgray;
+  }
+}
+
 .app-body {
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: -ms-autohiding-scrollbar;

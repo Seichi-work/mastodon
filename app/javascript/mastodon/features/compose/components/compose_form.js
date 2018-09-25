@@ -214,6 +214,12 @@ class ComposeForm extends ImmutablePureComponent {
         <div className='compose-form__publish'>
           <div className='compose-form__publish-button-wrapper'><Button text={publishText} onClick={this.handleSubmit} disabled={disabledButton} block /></div>
         </div>
+        <br />
+        <div class='announcement'>
+          <p>公式マイクラ鯖『整地Craft』</p>
+          <p>IP: seichi.work</p>
+          <p>Mod一覧: <a href='https://docs.google.com/document/d/1EDjewixgcKHaX_X8NMEQrcwhvMJo1BxyiAhcPyeGijU/edit?usp=sharing'>URL</a></p>
+        </div>
       </div>
     );
   }
