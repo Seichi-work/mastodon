@@ -52,12 +52,14 @@ class Status extends ImmutablePureComponent {
     onDirect: PropTypes.func,
     onMention: PropTypes.func,
     onPin: PropTypes.func,
+    onOpenStatus: PropTypes.func,
     onOpenMedia: PropTypes.func,
     onOpenVideo: PropTypes.func,
     onBlock: PropTypes.func,
     onEmbed: PropTypes.func,
     onHeightChange: PropTypes.func,
     onToggleHidden: PropTypes.func,
+    onQuoteToggleHidden: PropTypes.func,
     muted: PropTypes.bool,
     hidden: PropTypes.bool,
     onMoveUp: PropTypes.func,
@@ -82,6 +84,15 @@ class Status extends ImmutablePureComponent {
     this.context.router.history.push(`/statuses/${status.getIn(['reblog', 'id'], status.get('id'))}`);
   }
 
+  handleQuoteClick = () => {
+    if (!this.context.router) {
+      return;
+    }
+
+    const { status } = this.props;
+    this.context.router.history.push(`/statuses/${status.getIn(['reblog', 'quote', 'id'], status.getIn(['quote', 'id']))}`);
+  }
+
   handleAccountClick = (e) => {
     if (this.context.router && e.button === 0 && !(e.ctrlKey || e.metaKey)) {
       const id = e.currentTarget.getAttribute('data-id');
@@ -92,6 +103,10 @@ class Status extends ImmutablePureComponent {
 
   handleExpandedToggle = () => {
     this.props.onToggleHidden(this._properStatus());
+  };
+
+  handleExpandedQuoteToggle = () => {
+    this.props.onQuoteToggleHidden(this._properStatus());
   };
 
   renderLoadingMediaGallery () {
@@ -152,6 +167,12 @@ class Status extends ImmutablePureComponent {
     } else {
       return status;
     }
+  }
+
+  _properQuoteStatus () {
+    const { status } = this.props;
+
+    return status.get('quote');
   }
 
   render () {
@@ -243,7 +264,7 @@ class Status extends ImmutablePureComponent {
       } else {
         media = (
           <Bundle fetchComponent={MediaGallery} loading={this.renderLoadingMediaGallery}>
-            {Component => <Component media={status.get('media_attachments')} sensitive={status.get('sensitive')} height={110} onOpenMedia={this.props.onOpenMedia} />}
+            {Component => <Component media={status.get('media_attachments')} sensitive={status.get('sensitive')} height={110} onOpenMedia={this.props.onOpenMedia} onOpenStatus={this.props.onOpenStatus} />}
           </Bundle>
         );
       }
@@ -253,6 +274,42 @@ class Status extends ImmutablePureComponent {
       statusAvatar = <Avatar account={status.get('account')} size={48} />;
     }else{
       statusAvatar = <AvatarOverlay account={status.get('account')} friend={account} />;
+    }
+
+    let quote = null;
+    if (status.get('quote', null) !== null) {
+      let quote_status = status.get('quote');
+
+      let quote_media = null;
+      if (quote_status.get('media_attachments').size > 0) {
+        if (this.props.muted || quote_status.get('media_attachments').some(item => item.get('type') === 'unknown')) {
+          quote_media = (
+            <AttachmentList
+              compact
+              media={quote_status.get('media_attachments')}
+            />
+          );
+        } else {
+          quote_media = (
+            <Bundle fetchComponent={MediaGallery} loading={this.renderLoadingMediaGallery} >
+              {Component => <Component media={quote_status.get('media_attachments')} sensitive={quote_status.get('sensitive')} height={110} onOpenMedia={this.props.onOpenMedia} quote={true} />}
+            </Bundle>
+          );
+        }
+      }
+
+      quote = (
+        <div className={classNames('quote-status', `status-${quote_status.get('visibility')}`, { muted: this.props.muted })} data-id={quote_status.get('id')}>
+          <div className='status__info'>
+            <a onClick={this.handleAccountClick} target='_blank' data-id={quote_status.getIn(['account', 'id'])} href={quote_status.getIn(['account', 'url'])} title={quote_status.getIn(['account', 'acct'])} className='status__display-name'>
+              <div className='status__avatar'><Avatar account={quote_status.get('account')} size={18} /></div>
+              <DisplayName account={quote_status.get('account')} />
+            </a>
+          </div>
+          <StatusContent status={quote_status} onClick={this.handleQuoteClick} expanded={!status.get('quote_hidden')} onExpandedToggle={this.handleExpandedQuoteToggle} />
+          {quote_media}
+        </div>
+      );
     }
 
     const handlers = this.props.muted ? {} : {
@@ -285,8 +342,9 @@ class Status extends ImmutablePureComponent {
               </a>
             </div>
 
-            <StatusContent status={status} onClick={this.handleClick} expanded={!status.get('hidden')} onExpandedToggle={this.handleExpandedToggle} />
+            <StatusContent status={status} onClick={this.handleClick} expanded={!status.get('hidden')} onExpandedToggle={this.handleExpandedToggle} onOpenStatus={this.props.onOpenStatus} />
 
+            {quote}
             {media}
 
             <StatusActionBar status={status} account={account} {...other} />

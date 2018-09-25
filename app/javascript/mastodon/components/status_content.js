@@ -31,6 +31,8 @@ export default class StatusContent extends React.PureComponent {
     }
 
     const links = node.querySelectorAll('a');
+    const StatusUrlFormat = /(?:https?|ftp):\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+\/@[\w-_]+\/\w+/;
+    const statuses = node.innerText.match(new RegExp(`${StatusUrlFormat.source}`));
 
     for (var i = 0; i < links.length; ++i) {
       let link = links[i];
@@ -38,6 +40,10 @@ export default class StatusContent extends React.PureComponent {
         continue;
       }
       link.classList.add('status-link');
+
+      if (statuses && link.href.match(StatusUrlFormat)) {
+        link.addEventListener('click', this.onStatusUrlClick.bind(this, link.href), false);
+      }
 
       let mention = this.props.status.get('mentions').find(item => link.href === item.get('url'));
 
@@ -76,6 +82,13 @@ export default class StatusContent extends React.PureComponent {
     if (this.context.router && e.button === 0 && !(e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       this.context.router.history.push(`/timelines/tag/${hashtag}`);
+    }
+  }
+
+  onStatusUrlClick = (quoteUrl, e) => {
+    if (this.context.router && e.button === 0) {
+      e.preventDefault();
+      this.props.onOpenStatus(quoteUrl, this.context.router.history);
     }
   }
 

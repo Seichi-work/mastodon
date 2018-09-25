@@ -272,6 +272,10 @@
         "id": "status.cannot_reblog"
       },
       {
+        "defaultMessage": "Quote",
+        "id": "status.quote"
+      },
+      {
         "defaultMessage": "Favourite",
         "id": "status.favourite"
       },
@@ -831,6 +835,14 @@
         "id": "privacy.private.long"
       },
       {
+        "defaultMessage": "Limited",
+        "id": "privacy.limited.short"
+      },
+      {
+        "defaultMessage": "Post to followed users only",
+        "id": "privacy.limited.long"
+      },
+      {
         "defaultMessage": "Direct",
         "id": "privacy.direct.short"
       },
@@ -844,6 +856,15 @@
       }
     ],
     "path": "app/javascript/mastodon/features/compose/components/privacy_dropdown.json"
+  },
+  {
+    "descriptors": [
+      {
+        "defaultMessage": "Cancel",
+        "id": "quote_indicator.cancel"
+      }
+    ],
+    "path": "app/javascript/mastodon/features/compose/components/quote_indicator.json"
   },
   {
     "descriptors": [
@@ -978,6 +999,10 @@
       {
         "defaultMessage": "locked",
         "id": "compose_form.lock_disclaimer.lock"
+      },
+      {
+        "defaultMessage": "This post is for followed users. Only users you're following can view ones.",
+        "id": "compose_form.limited_disclaimer"
       },
       {
         "defaultMessage": "This toot won't be listed under any hashtag as it is unlisted. Only public toots can be searched by hashtag.",

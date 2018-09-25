@@ -4,6 +4,7 @@ import Status from '../components/status';
 import { makeGetStatus } from '../selectors';
 import {
   replyCompose,
+  quoteCompose,
   mentionCompose,
   directCompose,
 } from '../actions/compose';
@@ -22,6 +23,8 @@ import {
   deleteStatus,
   hideStatus,
   revealStatus,
+  hideQuote,
+  revealQuote,
 } from '../actions/statuses';
 import { initMuteModal } from '../actions/mutes';
 import { initReport } from '../actions/reports';
@@ -29,6 +32,7 @@ import { openModal } from '../actions/modal';
 import { defineMessages, injectIntl, FormattedMessage } from 'react-intl';
 import { boostModal, deleteModal } from '../initial_state';
 import { showAlertForError } from '../actions/alerts';
+import { fetchQuote } from '../actions/quotes';
 
 const messages = defineMessages({
   deleteConfirm: { id: 'confirmations.delete.confirm', defaultMessage: 'Delete' },
@@ -68,6 +72,10 @@ const mapDispatchToProps = (dispatch, { intl }) => ({
         dispatch(openModal('BOOST', { status, onReblog: this.onModalReblog }));
       }
     }
+  },
+
+  onQuote (status, router) {
+    dispatch(quoteCompose(status, router));
   },
 
   onFavourite (status) {
@@ -113,6 +121,10 @@ const mapDispatchToProps = (dispatch, { intl }) => ({
     dispatch(mentionCompose(account, router));
   },
 
+  onOpenStatus (quoteUrl, router) {
+    dispatch(fetchQuote(quoteUrl, router));
+  },
+
   onOpenMedia (media, index) {
     dispatch(openModal('MEDIA', { media, index }));
   },
@@ -150,6 +162,14 @@ const mapDispatchToProps = (dispatch, { intl }) => ({
       dispatch(revealStatus(status.get('id')));
     } else {
       dispatch(hideStatus(status.get('id')));
+    }
+  },
+
+  onQuoteToggleHidden (status) {
+    if (status.get('quote_hidden')) {
+      dispatch(revealQuote(status.get('id')));
+    } else {
+      dispatch(hideQuote(status.get('id')));
     }
   },
 

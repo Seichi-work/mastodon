@@ -21,6 +21,9 @@
 #  account_id             :bigint(8)        not null
 #  application_id         :bigint(8)
 #  in_reply_to_account_id :bigint(8)
+#  lat                    :decimal(17, 14)
+#  lon                    :decimal(17, 14)
+#  quote_id               :bigint(8)
 #
 
 class Status < ApplicationRecord
@@ -35,7 +38,7 @@ class Status < ApplicationRecord
 
   update_index('statuses#status', :proper) if Chewy.enabled?
 
-  enum visibility: [:public, :unlisted, :private, :direct], _suffix: :visibility
+  enum visibility: [:public, :unlisted, :private, :limited, :direct], _suffix: :visibility
 
   belongs_to :application, class_name: 'Doorkeeper::Application', optional: true
 
@@ -45,12 +48,14 @@ class Status < ApplicationRecord
 
   belongs_to :thread, foreign_key: 'in_reply_to_id', class_name: 'Status', inverse_of: :replies, optional: true
   belongs_to :reblog, foreign_key: 'reblog_of_id', class_name: 'Status', inverse_of: :reblogs, optional: true
+  belongs_to :quote, foreign_key: 'quote_id', class_name: 'Status', inverse_of: :quoted, optional: true
 
   has_many :favourites, inverse_of: :status, dependent: :destroy
   has_many :reblogs, foreign_key: 'reblog_of_id', class_name: 'Status', inverse_of: :reblog, dependent: :destroy
   has_many :replies, foreign_key: 'in_reply_to_id', class_name: 'Status', inverse_of: :thread
   has_many :mentions, dependent: :destroy
   has_many :media_attachments, dependent: :nullify
+  has_many :quoted, foreign_key: 'quote_id', class_name: 'Status', inverse_of: :quote
 
   has_and_belongs_to_many :tags
   has_and_belongs_to_many :preview_cards
@@ -132,6 +137,10 @@ class Status < ApplicationRecord
     !reblog_of_id.nil?
   end
 
+  def quote?
+    !quote_id.nil? && quote
+  end
+
   def within_realtime_window?
     created_at >= REAL_TIME_WINDOW.ago
   end
@@ -169,7 +178,7 @@ class Status < ApplicationRecord
   end
 
   def hidden?
-    private_visibility? || direct_visibility?
+    private_visibility? || limited_visibility? || direct_visibility?
   end
 
   def with_media?
@@ -181,7 +190,7 @@ class Status < ApplicationRecord
   end
 
   def emojis
-    @emojis ||= CustomEmoji.from_text([spoiler_text, text].join(' '), account.domain)
+    @emojis ||= CustomEmoji.from_text([spoiler_text, text].join(' '), account.domain) + (quote? ? CustomEmoji.from_text([quote.spoiler_text, quote.text].join(' '), quote.account.domain) : [])
   end
 
   def mark_for_mass_destruction!
@@ -236,7 +245,7 @@ class Status < ApplicationRecord
     end
 
     def as_home_timeline(account)
-      where(account: [account] + account.following).where(visibility: [:public, :unlisted, :private])
+      where(account: [account] + account.following).where(visibility: [:public, :unlisted, :private, :limited])
     end
 
     def as_direct_timeline(account, limit = 20, max_id = nil, since_id = nil, cache_ids = false)
@@ -345,6 +354,8 @@ class Status < ApplicationRecord
         # followers can see followers-only stuff, but also things they are mentioned in.
         # non-followers can see everything that isn't private/direct, but can see stuff they are mentioned in.
         visibility.push(:private) if account.following?(target_account)
+        # followed users can see limited toots.
+        visibility.push(:limited) if account.followed_by?(target_account)
 
         scope = left_outer_joins(:reblog)
 
@@ -449,7 +460,7 @@ class Status < ApplicationRecord
   end
 
   def increment_counter_caches
-    return if direct_visibility?
+    return if limited_visibility? || direct_visibility?
 
     if association(:account).loaded?
       account.update_attribute(:statuses_count, account.statuses_count + 1)
@@ -462,7 +473,7 @@ class Status < ApplicationRecord
   end
 
   def decrement_counter_caches
-    return if direct_visibility? || marked_for_mass_destruction?
+    return if limited_visibility? || direct_visibility? || marked_for_mass_destruction?
 
     if association(:account).loaded?
       account.update_attribute(:statuses_count, [account.statuses_count - 1, 0].max)

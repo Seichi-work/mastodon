@@ -4,6 +4,7 @@ import Button from '../../../components/button';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import PropTypes from 'prop-types';
 import ReplyIndicatorContainer from '../containers/reply_indicator_container';
+import QuoteIndicatorContainer from '../containers/quote_indicator_container';
 import AutosuggestTextarea from '../../../components/autosuggest_textarea';
 import UploadButtonContainer from '../containers/upload_button_container';
 import { defineMessages, injectIntl } from 'react-intl';
@@ -80,7 +81,7 @@ class ComposeForm extends ImmutablePureComponent {
     const { is_submitting, is_uploading, anyMedia } = this.props;
     const fulltext = [this.props.spoiler_text, countableText(this.props.text)].join('');
 
-    if (is_submitting || is_uploading || length(fulltext) > 500 || (fulltext.length !== 0 && fulltext.trim().length === 0 && !anyMedia)) {
+    if (is_submitting || is_uploading || length(fulltext) > 4096 || (fulltext.length !== 0 && fulltext.trim().length === 0 && !anyMedia)) {
       return;
     }
 
@@ -156,7 +157,7 @@ class ComposeForm extends ImmutablePureComponent {
     const { intl, onPaste, showSearch, anyMedia } = this.props;
     const disabled = this.props.is_submitting;
     const text     = [this.props.spoiler_text, countableText(this.props.text)].join('');
-    const disabledButton = disabled || this.props.is_uploading || length(text) > 500 || (text.length !== 0 && text.trim().length === 0 && !anyMedia);
+    const disabledButton = disabled || this.props.is_uploading || length(text) > 4096 || (text.length !== 0 && text.trim().length === 0 && !anyMedia);
     let publishText = '';
 
     if (this.props.privacy === 'private' || this.props.privacy === 'direct') {
@@ -170,6 +171,7 @@ class ComposeForm extends ImmutablePureComponent {
         <WarningContainer />
 
         <ReplyIndicatorContainer />
+        <QuoteIndicatorContainer />
 
         <div className={`spoiler-input ${this.props.spoiler ? 'spoiler-input--visible' : ''}`}>
           <label>
@@ -208,7 +210,7 @@ class ComposeForm extends ImmutablePureComponent {
             <SensitiveButtonContainer />
             <SpoilerButtonContainer />
           </div>
-          <div className='character-counter__wrapper'><CharacterCounter max={500} text={text} /></div>
+          <div className='character-counter__wrapper'><CharacterCounter max={4096} text={text} /></div>
         </div>
 
         <div className='compose-form__publish'>
