@@ -25,6 +25,7 @@ export const STATUS_MUTE_FAIL    = 'STATUS_MUTE_FAIL';
 export const STATUS_UNMUTE_REQUEST = 'STATUS_UNMUTE_REQUEST';
 export const STATUS_UNMUTE_SUCCESS = 'STATUS_UNMUTE_SUCCESS';
 export const STATUS_UNMUTE_FAIL    = 'STATUS_UNMUTE_FAIL';
+export const STATUS_ADD_COMMENT = 'STATUS_ADD_COMMENT';
 
 export const STATUS_REVEAL = 'STATUS_REVEAL';
 export const STATUS_HIDE   = 'STATUS_HIDE';
@@ -342,5 +343,18 @@ export function revealQuote(ids) {
   return {
     type: QUOTE_REVEAL,
     ids,
+  };
+};
+/**
+ * id: reply status id
+ * statusForId: reply status
+ */
+export function addCommentToCard(id, statusForId) {
+  return {
+    type: STATUS_ADD_COMMENT,
+    id: id,
+    contentHtml: statusForId.get('contentHtml'),
+    created_at: statusForId.get('created_at'),
+    account: statusForId.get('account')
   };
 };

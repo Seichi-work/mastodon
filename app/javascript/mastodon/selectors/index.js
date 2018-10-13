@@ -96,6 +96,56 @@ export const makeGetStatus = () => {
   );
 };
 
+export const gplusMakeGetStatus = () => {
+
+  return createSelector(
+    [
+      (state, { id }) => state.getIn(['statuses', id]),
+      (state, { id }) => state.getIn(['statuses', state.getIn(['statuses', id, 'reblog'])]),
+      (state, { id }) => state.getIn(['accounts', state.getIn(['statuses', id, 'account'])]),
+      (state, { id }) => state.getIn(['accounts', state.getIn(['statuses', state.getIn(['statuses', id, 'reblog']), 'account'])]),
+      getFilters,
+      (state, { id }) => state.get('statuses')
+        .filter( status => status.get('in_reply_to_id') === id )
+        .map( status =>
+          status.withMutations( map => {
+            map.set('account', state.getIn([
+              'accounts',
+              status.get('account')
+            ]));
+          })
+        )
+    ],
+
+    (statusBase, statusReblog, accountBase, accountReblog, filters, comments) => {
+
+      if (!statusBase) {
+        return null;
+      }
+
+      if (statusReblog) {
+        statusReblog = statusReblog.set('account', accountReblog);
+      } else {
+        statusReblog = null;
+      }
+
+      const regex    = (accountReblog || accountBase).get('id') !== me && regexFromFilters(filters);
+      const filtered = regex && regex.test(statusBase.get('reblog') ? statusReblog.get('search_index') : statusBase.get('search_index'));
+      const inReplyToId = statusBase.get('in_reply_to_id');
+
+      return statusBase.withMutations(map => {
+        map.set('reblog', statusReblog);
+        map.set('account', accountBase);
+        map.set('filtered', filtered);
+        map.set('comments', comments);
+        map.set('in_reply_to_id', inReplyToId);
+      });
+    }
+  );
+};
+
+
+
 const getAlertsBase = state => state.get('alerts');
 
 export const getAlerts = createSelector([getAlertsBase], (base) => {

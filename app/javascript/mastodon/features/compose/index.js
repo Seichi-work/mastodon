@@ -86,6 +86,9 @@ class Compose extends React.PureComponent {
           {!columns.some(column => column.get('id') === 'COMMUNITY') && (
             <Link to='/timelines/public/local' className='drawer__tab' title={intl.formatMessage(messages.community)} aria-label={intl.formatMessage(messages.community)}><i role='img' className='fa fa-fw fa-users' /></Link>
           )}
+          {!columns.some(column => column.get('id') === 'GPULS_COMMUNITY') && (
+            <Link to='/timelines/public/gplus' className='drawer__tab' title={intl.formatMessage(messages.community)} aria-label={intl.formatMessage(messages.community)}><i role='img' className='fa fa-fw fa-users' /></Link>
+          )}
           {!columns.some(column => column.get('id') === 'PUBLIC') && (
             <Link to='/timelines/public' className='drawer__tab' title={intl.formatMessage(messages.public)} aria-label={intl.formatMessage(messages.public)}><i role='img' className='fa fa-fw fa-globe' /></Link>
           )}
