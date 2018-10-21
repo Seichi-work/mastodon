@@ -26,7 +26,7 @@ class ActivityPub::Activity::Accept < ActivityPub::Activity
   end
 
   def relay
-    @relay ||= Relay.find_by(follow_activity_id: object_uri) unless object_uri.nil?
+    @relay ||= Relay.find_by(follow_activity_id: object_uri)
   end
 
   def relay_follow?
