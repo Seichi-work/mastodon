@@ -5,15 +5,15 @@ module Mastodon
     module_function
 
     def major
-      0
+      2
     end
 
     def minor
-      0
+      5
     end
 
     def patch
-      0
+      2
     end
 
     def pre
