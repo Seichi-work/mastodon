@@ -1499,6 +1499,7 @@ a.account__display-name {
   cursor: default;
   color: $darker-text-color;
   font-size: 15px;
+  line-height: 22px;
   position: relative;
 
   .fa {
@@ -1506,7 +1507,7 @@ a.account__display-name {
   }
 
   > span {
-    display: block;
+    display: inline;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -1534,6 +1535,10 @@ a.account__display-name {
     color: $primary-text-color;
     text-decoration: underline;
   }
+}
+
+.notification__relative_time {
+  float: right;
 }
 
 .display-name {
@@ -2101,6 +2106,16 @@ a.account__display-name {
 
   @supports(display: grid) { // hack to fix Chrome <57
     contain: strict;
+  }
+
+  &--flex {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__append {
+    flex: 1 1 auto;
+    position: relative;
   }
 }
 
@@ -3032,6 +3047,26 @@ a.status-card.compact:hover {
   display: block;
   font-weight: 500;
   margin-bottom: 10px;
+
+  .column-settings__hashtag-select {
+    &__control {
+      @include search-input();
+    }
+
+    &__multi-value {
+      background: lighten($ui-base-color, 8%);
+    }
+
+    &__multi-value__label,
+    &__input {
+      color: $darker-text-color;
+    }
+
+    &__indicator-separator,
+    &__dropdown-indicator {
+      display: none;
+    }
+  }
 }
 
 .column-settings__row {
@@ -3483,36 +3518,10 @@ a.status-card.compact:hover {
 }
 
 .search__input {
-  outline: 0;
-  box-sizing: border-box;
   display: block;
-  width: 100%;
-  border: none;
   padding: 10px;
   padding-right: 30px;
-  font-family: inherit;
-  background: $ui-base-color;
-  color: $darker-text-color;
-  font-size: 14px;
-  margin: 0;
-
-  &::-moz-focus-inner {
-    border: 0;
-  }
-
-  &::-moz-focus-inner,
-  &:focus,
-  &:active {
-    outline: 0 !important;
-  }
-
-  &:focus {
-    background: lighten($ui-base-color, 4%);
-  }
-
-  @media screen and (max-width: 600px) {
-    font-size: 16px;
-  }
+  @include search-input();
 }
 
 .search__icon {
@@ -4664,6 +4673,19 @@ a.status-card.compact:hover {
   z-index: 5;
 }
 
+.detailed,
+.fullscreen {
+  .video-player__volume__current,
+  .video-player__volume::before {
+    bottom: 27px;
+  }
+
+  .video-player__volume__handle {
+    bottom: 23px;
+  }
+
+}
+
 .video-player {
   overflow: hidden;
   position: relative;
@@ -4812,7 +4834,7 @@ a.status-card.compact:hover {
 
   &__time-current {
     color: $white;
-    margin-left: 10px;
+    margin-left: 60px;
   }
 
   &__time-sep {
@@ -4823,6 +4845,48 @@ a.status-card.compact:hover {
   &__time-sep,
   &__time-total {
     color: $white;
+  }
+
+  &__volume {
+    cursor: pointer;
+    height: 24px;
+    display: inline;
+
+    &::before {
+      content: "";
+      width: 50px;
+      background: rgba($white, 0.35);
+      border-radius: 4px;
+      display: block;
+      position: absolute;
+      height: 4px;
+      left: 70px;
+      bottom: 20px;
+    }
+
+    &__current {
+      display: block;
+      position: absolute;
+      height: 4px;
+      border-radius: 4px;
+      left: 70px;
+      bottom: 20px;
+      background: lighten($ui-highlight-color, 8%);
+    }
+
+    &__handle {
+      position: absolute;
+      z-index: 3;
+      border-radius: 50%;
+      width: 12px;
+      height: 12px;
+      bottom: 16px;
+      left: 70px;
+      transition: opacity .1s ease;
+      background: lighten($ui-highlight-color, 8%);
+      box-shadow: 1px 2px 6px rgba($base-shadow-color, 0.2);
+      pointer-events: none;
+    }
   }
 
   &__seek {
@@ -5351,6 +5415,47 @@ noscript {
 
   .search {
     margin-bottom: 0;
+  }
+}
+
+.list-adder {
+  background: $ui-base-color;
+  flex-direction: column;
+  border-radius: 8px;
+  box-shadow: 2px 4px 15px rgba($base-shadow-color, 0.4);
+  width: 380px;
+  overflow: hidden;
+
+  @media screen and (max-width: 420px) {
+    width: 90%;
+  }
+
+  &__account {
+    background: lighten($ui-base-color, 13%);
+  }
+
+  &__lists {
+    background: lighten($ui-base-color, 13%);
+    height: 50vh;
+    border-radius: 0 0 8px 8px;
+    overflow-y: auto;
+  }
+
+  .list {
+    padding: 10px;
+    border-bottom: 1px solid lighten($ui-base-color, 8%);
+  }
+
+  .list__wrapper {
+    display: flex;
+  }
+
+  .list__display-name {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 10px;
   }
 }
 
